@@ -1,11 +1,12 @@
-import { useState } from 'react'
+/* eslint-disable import/prefer-default-export */
+import { useState } from 'react';
+import { v4 as uuid } from 'uuid';
+import '../styles/tasklist.scss';
 
-import '../styles/tasklist.scss'
-
-import { FiTrash, FiCheckSquare } from 'react-icons/fi'
+import { FiTrash, FiCheckSquare } from 'react-icons/fi';
 
 interface Task {
-  id: number;
+  id: string;
   title: string;
   isComplete: boolean;
 }
@@ -16,14 +17,31 @@ export function TaskList() {
 
   function handleCreateNewTask() {
     // Crie uma nova task com um id random, não permita criar caso o título seja vazio.
+    const id = uuid();
+    if (newTaskTitle) {
+      setTasks((oldValues) => [...oldValues, {
+        id,
+        title: newTaskTitle,
+        isComplete: false,
+      }]);
+    }
   }
 
-  function handleToggleTaskCompletion(id: number) {
+  function handleToggleTaskCompletion(id: string) {
     // Altere entre `true` ou `false` o campo `isComplete` de uma task com dado ID
+    const task = tasks.find((taskFiltered: Task) => taskFiltered.id === id);
+    const tasksFiltered = tasks.filter((taskFiltered: Task) => taskFiltered.id !== id);
+    if (task) {
+      const taskEdited: Task = { ...task, isComplete: !task.isComplete };
+      const newTasks: Task[] = [...tasksFiltered, { ...taskEdited }];
+      setTasks(newTasks);
+    }
   }
 
-  function handleRemoveTask(id: number) {
+  function handleRemoveTask(id: string) {
     // Remova uma task da listagem pelo ID
+    const tasksFiltered = tasks.filter((taskFiltered: Task) => taskFiltered.id !== id);
+    setTasks(tasksFiltered);
   }
 
   return (
@@ -32,9 +50,9 @@ export function TaskList() {
         <h2>Minhas tasks</h2>
 
         <div className="input-group">
-          <input 
-            type="text" 
-            placeholder="Adicionar novo todo" 
+          <input
+            type="text"
+            placeholder="Adicionar novo todo"
             onChange={(e) => setNewTaskTitle(e.target.value)}
             value={newTaskTitle}
           />
@@ -46,11 +64,11 @@ export function TaskList() {
 
       <main>
         <ul>
-          {tasks.map(task => (
+          {tasks.map((task) => (
             <li key={task.id}>
               <div className={task.isComplete ? 'completed' : ''} data-testid="task" >
                 <label className="checkbox-container">
-                  <input 
+                  <input
                     type="checkbox"
                     readOnly
                     checked={task.isComplete}
@@ -66,9 +84,9 @@ export function TaskList() {
               </button>
             </li>
           ))}
-          
+
         </ul>
       </main>
     </section>
-  )
+  );
 }
